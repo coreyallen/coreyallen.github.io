@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Signature Generator</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        .container {
+            max-width: 600px !important;
+        }
+        .label {
+            text-align: left;
+        }
+        #preview {
+            margin-top: 20px;
+            border: 1px solid #dbdbdb;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        #preview table {
+            margin: 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container has-text-centered">
+            <h1 class="title">Email Signature Generator1</h1>
+            <p class="subtitle is-6 mb-5">If you have any issues please contact Corey</p>
+            <p class="subtitle is-6 mb-5">If your email client is automatically creating links to your email and web url <a href="https://share.zight.com/bLuNgnkn">watch this video</a> to see how to fix it</p>
+            
+            <div class="box has-text-left" id="preview"></div>
+            
+            <div class="box">
+                <div class="field">
+                    <label class="label">Name</label>
+                    <div class="control">
+                        <input class="input" type="text" id="name" name="name" required placeholder="Enter your name">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Title</label>
+                    <div class="control">
+                        <input class="input" type="text" id="title" name="title" required placeholder="Enter your title">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="email" id="email" name="email" required placeholder="email@example.com">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="emailValidationIcon">
+                        </span>
+                    </div>
+                    <p class="help is-danger" id="emailHelp"></p>
+                </div>
+
+                <div class="field">
+                    <label class="label">Office</label>
+                    <div class="control">
+                        <input class="input" type="text" id="office" name="office" placeholder="Enter your office number (optional)">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Mobile</label>
+                    <div class="control">
+                        <input class="input" type="text" id="mobile" name="mobile" placeholder="Enter your mobile number (optional)">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Company</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select id="company" name="company">
+                                <option value="rcs">RCS</option>
+                                <option value="mediamonitors">Media Monitors</option>
+                                <option value="mediabase">Mediabase</option>
+                                <option value="florical">Florical</option>
+                                <option value="rcsmm_au">RCS Media Monitors AU</option>
+                                <option value="rcsmm_nz">RCS Media Monitors NZ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <label class="checkbox">
+                            <input type="checkbox" id="noBoxOption">
+                            No Box Option
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-danger" onclick="generateAndCopy()">
+                            Generate and Copy Signature
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<script>
+    // Add Font Awesome for icons
+    document.head.innerHTML += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">';
+    
+    // Email validation
+    document.getElementById('email').addEventListener('input', function(e) {
+        const email = e.target.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+        const input = e.target;
+        const icon = document.getElementById('emailValidationIcon');
+        const help = document.getElementById('emailHelp');
+        
+        if (email === '') {
+            input.classList.remove('is-danger', 'is-success');
+            icon.innerHTML = '';
+            help.textContent = '';
+        } else if (isValid) {
+            input.classList.remove('is-danger');
+            input.classList.add('is-success');
+            icon.innerHTML = '<i class="fas fa-check"></i>';
+            help.textContent = '';
+        } else {
+            input.classList.remove('is-success');
+            input.classList.add('is-danger');
+            icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            help.textContent = 'Please enter a valid email address';
+        }
+    });
+
+    function showNotification(message, type) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create new notification
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <button class="delete"></button>
+            ${message}
+        `;
+
+        // Add notification to the page
+        document.querySelector('.container').insertBefore(notification, document.querySelector('.box'));
+
+        // Add close button functionality
+        notification.querySelector('.delete').addEventListener('click', () => {
+            notification.remove();
+        });
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    function generateAndCopy() {
+        // Validate all fields are filled
+        const fields = ['name', 'title', 'email'];
+        for (const field of fields) {
+            const input = document.getElementById(field);
+            if (!input.value) {
+                showNotification(`Please fill in the ${field} field`, 'is-danger');
+                return;
+            }
+        }
+
+        // Validate email format
+        const email = document.getElementById('email').value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showNotification('Please enter a valid email address', 'is-danger');
+            return;
+        }
+
+        const name = document.getElementById('name').value;
+        const title = document.getElementById('title').value;
+        const office = document.getElementById('office').value;
+        const mobile = document.getElementById('mobile').value;
+        const company = document.getElementById('company').value;
+
+        // Define company-specific details
+        const companyDetails = {
+            rcs: {
+                url: 'www.rcsworks.com',
+                website: 'https://www.rcsworks.com',
+                tagline: 'Evolving The World Of Audio'
+            },
+            mediamonitors: {
+                url: 'www.mediamonitors.com',
+                website: 'https://www.mediamonitors.com',
+                tagline: 'The leader in local media monitoring.'
+            },
+            mediabase: {
+                url: 'www.mediabase.com',
+                website: 'https://www.mediabase.com',
+                tagline: 'We know music'
+            },
+            florical: {
+                url: 'www.florical.com',
+                website: 'https://www.florical.com',
+                tagline: 'Think Forward. Think Florical'
+            },
+            rcsmm_au: {
+                url: 'www.rcsmediamonitors.com.au',
+                website: 'https://www.rcsmediamonitors.com.au',
+                tagline: 'The leader in local media monitoring'
+            },
+            rcsmm_nz: {
+                url: 'www.rcsmediamonitors.co.nz',
+                website: 'https://www.rcsmediamonitors.co.nz',
+                tagline: 'The leader in local media monitoring'
+            }
+        };
+
+        const selectedCompany = companyDetails[company];
+
+        const signature = `<table id="escmadbirdies" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 600px; white-space: nowrap;">
+            <tbody>
+                <tr>
+                    <td valign="top" style="padding-bottom: 5px">
+                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
+                            <tbody>
+                                <tr valign="top">
+                                    <td style="padding: 0; border-left: 1px solid #595a5a; font: 0/0 Arial"></td>
+                                    <td valign="top" style="padding-left: 20px">
+                                        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
+                                            <tbody>
+                                                <tr>
+                                                    <td valign="top" nowrap style="padding-bottom: 5px; white-space: nowrap;">
+                                                        <span style="color: #595a5a; font: bold 15px/18px Arial, sans-serif; line-height: 17px">${name}<br /></span>
+                                                        <span style="color: #595a5a; font: 12px/18px Arial, sans-serif; line-height: 18px">${title}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td valign="top" style="padding-top: 5px; white-space: nowrap;">
+                                                        <table border="0" cellpadding="0" cellspacing="0" style="font: 12px/18px Arial, sans-serif; border-collapse: collapse; white-space: nowrap;">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td nowrap>
+                                                                        <span style="color: #595a5a; font: 12px/18px Arial, sans-serif; text-decoration: none; line-height: 18px">${email}</span>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td nowrap>
+                                                                        ${office ? `<span style="color: #595a5a; font: 12px/18px Arial, sans-serif; line-height: 18px">Office: ${office}</span><br />` : ''}
+                                                                        ${mobile ? `<span style="color: #595a5a; font: 12px/18px Arial, sans-serif; line-height: 18px">Mobile: ${mobile}</span><br />` : ''}
+                                                                        <span style="color: #595a5a; font: 12px/18px Arial, sans-serif; text-decoration: none; line-height: 18px">${selectedCompany.url}</span><br />
+                                                                        <i style="line-height: 18px; color: #595a5a; font-family: Arial, sans-serif;">${selectedCompany.tagline}</i>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>`;
+
+        // Show preview
+        document.getElementById('preview').innerHTML = signature;
+
+        // Copy rendered content to clipboard
+        const previewDiv = document.getElementById('preview');
+        const range = document.createRange();
+        range.selectNode(previewDiv);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        
+        try {
+            document.execCommand('copy');
+            showNotification('Signature has been copied to clipboard! You can now paste it into your email signature settings.', 'is-success');
+        } catch (err) {
+            showNotification('Failed to copy signature. Your browser might not support this feature.', 'is-danger');
+        }
+        
+        window.getSelection().removeAllRanges();
+    }
+
+    document.getElementById('noBoxOption').addEventListener('change', function() {
+        const preview = document.getElementById('preview');
+        const leftBorderCell = preview.querySelector('td[style*="border-left"]');
+        const allCells = preview.querySelectorAll('td, span, i');
+        if (this.checked) {
+            preview.style.border = 'none';
+            preview.style.padding = '0';
+            preview.style.backgroundColor = 'transparent';
+            allCells.forEach(cell => {
+                cell.style.border = 'none';
+                cell.style.padding = '0';
+                cell.style.margin = '0';
+                cell.style.backgroundColor = 'transparent';
+                cell.style.font = 'inherit';
+                cell.style.color = 'inherit';
+            });
+            if (leftBorderCell) {
+                leftBorderCell.style.borderLeft = 'none';
+            }
+        } else {
+            preview.style.border = '1px solid #dbdbdb';
+            preview.style.padding = '5px';
+            preview.style.backgroundColor = '';
+            allCells.forEach(cell => {
+                cell.style.border = '';
+                cell.style.padding = '';
+                cell.style.margin = '';
+                cell.style.backgroundColor = '';
+                cell.style.font = '';
+                cell.style.color = '';
+            });
+            if (leftBorderCell) {
+                leftBorderCell.style.borderLeft = '1px solid #595a5a';
+            }
+        }
+    });
+</script>
+</body>
+</html> 
